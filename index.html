@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scoop Swift | Pet Waste Removal</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root {
+      --cream: #f4ebd2;
+      --tan: #b08d57;
+      --blue: #005bff;
+      --yellow: #ffc928;
+      --white: #ffffff;
+      --footer-navy: #021b4d;
+      --secondary-navy: #0a2a6b;
+      --ink: #06133a;
+      --soft-shadow: 0 24px 70px rgba(2, 27, 77, 0.18);
+      --card-shadow: 0 14px 35px rgba(2, 27, 77, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--cream);
+      color: var(--footer-navy);
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 28px;
+      border: 0;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(2, 27, 77, 0.16);
+    }
+
+    .btn-blue {
+      background: var(--blue);
+      color: var(--white);
+    }
+
+    .btn-blue:hover {
+      background: var(--secondary-navy);
+    }
+
+    .btn-yellow {
+      background: var(--yellow);
+      color: var(--footer-navy);
+    }
+
+    .btn-outline {
+      background: var(--white);
+      color: var(--footer-navy);
+      border: 2px solid var(--footer-navy);
+    }
+
+    p.section-label {
+      color: var(--yellow)!important;
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+    }
+
+    .nav-wrap {
+      padding: 24px 0 0;
+      position: relative;
+      z-index: 4;
+    }
+
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 30px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 26px rgba(2, 27, 77, 0.08);
+    }
+
+    .logo img {
+      width: 176px;
+      height: auto;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 34px;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .nav-links a:hover {
+      color: var(--blue);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 18px 0 96px;
+      background:
+        linear-gradient(90deg, rgba(244, 235, 210, 0.95) 0%, rgba(244, 235, 210, 0.86) 45%, rgba(244, 235, 210, 0.64) 100%),
+        url("image (24).png") center bottom / cover no-repeat;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 999px;
+      filter: blur(34px);
+      pointer-events: none;
+    }
+
+    .hero::before {
+      width: 180px;
+      height: 180px;
+      left: 5%;
+      top: 140px;
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .hero::after {
+      width: 220px;
+      height: 220px;
+      right: 6%;
+      top: 90px;
+      background: rgba(255, 201, 40, 0.32);
+    }
+
+    .accent-bursts {
+      position: absolute;
+      top: 126px;
+      left: 50%;
+      z-index: 1;
+      width: min(560px, 70vw);
+      transform: translateX(-50%);
+      opacity: 0.95;
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1.02fr 0.98fr;
+      align-items: center;
+      gap: 54px;
+      padding-top: 82px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 22px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: var(--white);
+      color: var(--secondary-navy);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      box-shadow: 0 8px 20px rgba(2, 27, 77, 0.08);
+    }
+
+    .badge span {
+      color: var(--yellow);
+      font-size: 18px;
+    }
+
+    h1 {
+      max-width: 760px;
+      font-size: clamp(46px, 7vw, 82px);
+      line-height: 0.94;
+      font-weight: 1000;
+      letter-spacing: -0.07em;
+      color: var(--footer-navy);
+    }
+
+    .hero-copy {
+      max-width: 650px;
+      margin-top: 24px;
+      font-size: 19px;
+      font-weight: 700;
+      color: rgba(10, 42, 107, 0.84);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 34px;
+    }
+
+    .trust-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      max-width: 600px;
+      margin-top: 28px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .trust-list li {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .check {
+      display: inline-grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: var(--white);
+      font-size: 12px;
+      flex: 0 0 auto;
+    }
+
+    .hero-mascot-wrap {
+      position: relative;
+      min-height: 560px;
+    }
+
+    .hero-mascot {
+      position: absolute;
+      right: -8px;
+      bottom: 0;
+      z-index: 2;
+      width: min(520px, 100%);
+      filter: drop-shadow(0 28px 24px rgba(2, 27, 77, 0.18));
+    }
+
+    .floating-card {
+      position: absolute;
+      left: 0;
+      bottom: 42px;
+      z-index: 3;
+      width: min(290px, 70%);
+      padding: 18px;
+      border-radius: 28px;
+      background: var(--white);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .floating-card strong {
+      display: block;
+      font-size: 20px;
+      font-weight: 1000;
+      letter-spacing: -0.04em;
+    }
+
+    .floating-card p {
+      margin-top: 4px;
+      color: rgba(10, 42, 107, 0.78);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .section-white {
+      background: var(--white);
+      padding: 88px 0;
+    }
+
+    .section-cream {
+      position: relative;
+      overflow: hidden;
+      background: var(--cream);
+      padding: 88px 0;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 42px;
+    }
+
+    .section-heading h2,
+    .center-heading h2 {
+      margin-top: 10px;
+      font-size: clamp(36px, 5vw, 56px);
+      line-height: 0.98;
+      font-weight: 1000;
+      letter-spacing: -0.06em;
+    }
+
+    .section-heading p {
+      max-width: 560px;
+      color: rgba(10, 42, 107, 0.8);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .services-grid,
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .service-plans-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .service-box,
+    .plan-card {
+      border-radius: 32px;
+      background: var(--white);
+      box-shadow: var(--card-shadow);
+    }
+
+    .service-box {
+      position: relative;
+      min-height: 330px;
+      overflow: hidden;
+      padding: 32px;
+      border: 2px solid var(--cream);
+      box-shadow: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .service-box:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--card-shadow);
+    }
+
+    .service-box h3,
+    .plan-card h3 {
+      position: relative;
+      z-index: 2;
+      font-size: 26px;
+      font-weight: 1000;
+      letter-spacing: -0.04em;
+    }
+
+    .service-box p,
+    .plan-card p {
+      position: relative;
+      z-index: 2;
+      margin-top: 12px;
+      color: rgba(10, 42, 107, 0.8);
+      font-weight: 700;
+    }
+
+    .service-art {
+      position: absolute;
+      right: 18px;
+      bottom: 14px;
+      z-index: 1;
+      max-width: 72%;
+      max-height: 180px;
+      object-fit: contain;
+      filter: drop-shadow(0 18px 16px rgba(2, 27, 77, 0.12));
+    }
+
+    .service-box.dark {
+      background: var(--footer-navy);
+      color: var(--white);
+      border-color: var(--footer-navy);
+    }
+
+    .service-box.dark p {
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .service-box.dark .service-art {
+      max-width: 60%;
+    }
+
+    .yard-band {
+      position: relative;
+      margin-top: 44px;
+      overflow: hidden;
+      min-height: 230px;
+      border: 8px solid var(--white);
+      border-radius: 36px;
+      background: url("image (24).png") center / cover no-repeat;
+      box-shadow: var(--card-shadow);
+          display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    }
+
+    .yard-band::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(244, 235, 210, 0.18), rgba(244, 235, 210, 0.66));
+    }
+
+    .yard-band-copy {
+      position: relative;
+      z-index: 1; 
+      padding: 34px;
+    }
+
+    .yard-band-copy h3 {
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: -0.05em;
+    }
+
+    .yard-band-copy p {
+      margin-top: 12px;
+      color: rgba(10, 42, 107, 0.82);
+      font-weight: 800;
+    }
+
+    .center-heading {
+      max-width: 720px;
+      margin: 0 auto 44px;
+      text-align: center;
+    }
+
+    .plans-grid {
+      position: relative;
+      z-index: 1;
+    }
+
+    .grass-accent {
+      position: absolute;
+      right: 7%;
+      top: 32px;
+      width: 150px;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .plan-card {
+      padding: 34px;
+      border: 2px solid var(--white);
+    }
+
+    .service-plan-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 270px;
+      padding: 28px;
+      border: 2px solid var(--white);
+      border-radius: 32px;
+      background: var(--white);
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .service-plan-card.featured {
+      background: var(--footer-navy);
+      color: var(--white);
+      border-color: var(--yellow);
+    }
+
+    .service-plan-card h3 {
+      position: relative;
+      z-index: 2;
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: -0.04em;
+    }
+
+    .service-plan-card p {
+      position: relative;
+      z-index: 2;
+      margin-top: 12px;
+      color: rgba(10, 42, 107, 0.82);
+      font-weight: 800;
+    }
+
+    .service-plan-card.featured p {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .service-plan-card .btn {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      margin-top: 24px;
+      padding: 0 16px;
+      font-size: 13px;
+    }
+
+    .service-plan-card img {
+      position: absolute;
+      right: -20px;
+      bottom: -18px;
+      width: 130px;
+      opacity: 0.16;
+      pointer-events: none;
+    }
+
+    .service-plan-card.featured img {
+      opacity: 0.2;
+    }
+
+    .plan-card.featured {
+      background: var(--footer-navy);
+      color: var(--white);
+      border-color: var(--yellow);
+      transform: scale(1.02);
+    }
+
+    .plan-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .plan-top img {
+      width: 58px;
+      height: 58px;
+      object-fit: contain;
+    }
+
+    .plan-pill {
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--cream);
+      color: var(--footer-navy);
+      font-size: 13px;
+      font-weight: 1000;
+      text-transform: uppercase;
+    }
+
+    .featured .plan-pill {
+      background: var(--yellow);
+    }
+
+    .featured p {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .plan-card .btn {
+      width: 100%;
+      margin-top: 30px;
+    }
+
+    .service-area {
+      position: relative;
+      overflow: hidden;
+      background: var(--white);
+      padding: 88px 0;
+    }
+
+    .service-area::before {
+      content: "";
+      position: absolute;
+      left: -110px;
+      top: -120px;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: rgba(255, 201, 40, 0.22);
+    }
+
+    .service-area-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 36px;
+      align-items: stretch;
+    }
+
+    .area-card,
+    .map-card {
+      border-radius: 36px;
+      background: var(--cream);
+      box-shadow: var(--card-shadow);
+    }
+
+    .area-card {
+      padding: 36px;
+      border: 2px solid rgba(176, 141, 87, 0.22);
+    }
+
+    .area-card h2 {
+      margin-top: 10px;
+      font-size: clamp(36px, 5vw, 54px);
+      line-height: 0.98;
+      font-weight: 1000;
+      letter-spacing: -0.06em;
+    }
+
+    .area-card p {
+      margin-top: 18px;
+      color:#fff;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .location-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 26px;
+      list-style: none;
+    }
+
+    .location-list li {
+      padding: 10px 14px;
+      border: 2px solid var(--white);
+      border-radius: 999px;
+      background: var(--white);
+      color: var(--footer-navy);
+      font-size: 14px;
+      font-weight: 900;
+      box-shadow: 0 8px 16px rgba(2, 27, 77, 0.06);
+    }
+
+    .location-list li:first-child {
+      background: var(--yellow);
+      border-color: var(--yellow);
+    }
+
+    .area-note {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 28px;
+      padding: 16px;
+      border-radius: 24px;
+      background: var(--footer-navy);
+      color: var(--white);
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff !important;;
+    }
+
+    .area-note span {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--yellow);
+      color: var(--footer-navy);
+      flex: 0 0 auto;
+    }
+
+    .map-card {
+      overflow: hidden;
+      min-height: 430px;
+      border: 8px solid var(--cream);
+      background: var(--footer-navy);
+    }
+
+    #serviceMap {
+      width: 100%;
+      height: 100%;
+      min-height: 430px;
+      border-radius: 28px;
+      overflow: hidden;
+      background: var(--cream);
+    }
+
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      color: var(--footer-navy);
+      font-family: Arial, Helvetica, sans-serif;
+      font-weight: 800;
+    }
+
+    .leaflet-control-attribution {
+      font-size: 10px;
+    }
+
+    .contact {
+      position: relative;
+      overflow: hidden;
+      background: var(--footer-navy);
+      color: var(--white);
+      padding: 88px 0;
+    }
+
+    .contact::after {
+      content: "";
+      position: absolute;
+      right: -80px;
+      bottom: -110px;
+      width: 430px;
+      height: 430px;
+      border-radius: 50%;
+      background: rgba(0, 91, 255, 0.18);
+    }
+
+    .contact-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 54px;
+      align-items: start;
+    }
+
+    .contact .section-label {
+      color: var(--yellow);
+    }
+
+    .contact h2 {
+      margin-top: 10px;
+      font-size: clamp(38px, 5vw, 58px);
+      line-height: 0.98;
+      font-weight: 1000;
+      letter-spacing: -0.06em;
+    }
+
+    .contact-copy {
+      max-width: 520px;
+      margin-top: 20px;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .contact-mascot {
+      width: min(280px, 70%);
+      margin-top: 28px;
+      filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.22));
+    }
+
+    .contact-list {
+      margin-top: 28px;
+      display: grid;
+      gap: 16px;
+      color: rgba(255, 255, 255, 0.86);
+      font-weight: 800;
+      list-style: none;
+    }
+
+    .contact-list span {
+      color: var(--yellow);
+      margin-right: 8px;
+    }
+
+    .quote-form {
+      padding: 34px;
+      border-radius: 32px;
+      background: var(--white);
+      color: var(--footer-navy);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 2px solid var(--cream);
+      border-radius: 18px;
+      padding: 16px 18px;
+      color: var(--footer-navy);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 700;
+      outline: none;
+      transition: border 0.2s ease;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--blue);
+    }
+
+    textarea,
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    textarea {
+      min-height: 126px;
+      resize: vertical;
+    }
+
+    .form-note {
+      margin-top: 16px;
+      text-align: center;
+      color: rgba(10, 42, 107, 0.72);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    footer {
+      background: #010f2c;
+      color: var(--white);
+      padding: 28px 0;
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    footer .logo img {
+      width: 156px;
+    }
+
+    .copyright {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 920px) {
+      .nav-links {
+        display: none;
+      }
+
+      .hero-grid,
+      .contact-grid,
+      .service-area-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-mascot-wrap {
+        min-height: 460px;
+      }
+
+      .hero-mascot {
+        right: 0;
+        width: min(460px, 96%);
+      }
+
+      .section-heading {
+        display: block;
+      }
+
+      .section-heading p {
+        margin-top: 18px;
+      }
+
+      .services-grid,
+      .plans-grid,
+      .service-plans-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .plan-card.featured {
+        transform: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .container {
+        width: min(100% - 28px, 1180px);
+      }
+
+      .navbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .navbar .btn {
+        width: 100%;
+      }
+
+      .logo img {
+        width: 150px;
+      }
+
+      .hero {
+        padding-bottom: 64px;
+      }
+
+      .accent-bursts {
+        display: none;
+      }
+
+      .hero-grid {
+        padding-top: 58px;
+      }
+
+      .hero-actions,
+      .trust-list {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-actions .btn {
+        width: 100%;
+      }
+
+      .hero-mascot-wrap {
+        min-height: 390px;
+      }
+
+      .floating-card {
+        left: 0;
+        bottom: 8px;
+        width: 78%;
+      }
+
+      .section-white,
+      .section-cream,
+      .service-area,
+      .contact {
+        padding: 66px 0;
+      }
+
+      .service-box {
+        min-height: 300px;
+      }
+
+      .yard-band-copy {
+        padding: 24px;
+      }
+
+      .area-card {
+        padding: 26px;
+      }
+
+      .map-card,
+      #serviceMap {
+        min-height: 340px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <img class="accent-bursts" src="image (25).png" alt="Decorative yellow action marks" />
+
+    <div class="nav-wrap">
+      <nav class="navbar container" aria-label="Main navigation">
+        <a href="#" class="logo" aria-label="Scoop Swift home">
+          <img src="image (26).png" alt="Scoop Swift logo" />
+        </a>
+
+        <div class="nav-links">
+          <a href="#services">Services</a>
+          <a href="#plans">Plans</a>
+          <a href="#contact">Contact</a>
+          <a href="#service-area">Service Area</a>
+        </div>
+
+        <a class="btn btn-blue" href="#contact">Get My Quote</a>
+      </nav>
+    </div>
+
+    <div class="hero-grid container">
+      <div class="hero-content">
+        <div class="badge"><span>✦</span> Clean yards. Happy pets. Zero hassle.</div>
+        <h1>Swift pet waste removal for a yard you can enjoy again.</h1>
+        <p class="hero-copy">
+          Scoop Swift helps busy pet owners keep their lawns clean with dependable weekly service,
+          one-time cleanups, and simple quote requests.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-blue" href="#contact">Get My Quote</a>
+          <a class="btn btn-outline" href="#plans">Choose Plan</a>
+        </div>
+
+        <ul class="trust-list" aria-label="Service highlights">
+          <li><span class="check">✓</span> Fast & easy</li>
+          <li><span class="check">✓</span> No obligations</li>
+          <li><span class="check">✓</span> Local & reliable</li>
+        </ul>
+      </div>
+
+      <div class="hero-mascot-wrap" aria-label="Scoop Swift mascot illustration">
+        <img class="hero-mascot" src="image (20).png" alt="Scoop Swift superhero dog mascot" />
+        <div class="floating-card">
+          <strong>Super clean, super swift.</strong>
+          <p>Book recurring service or a one-time yard reset in just a few clicks.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="section-white" id="services">
+    <div class="container">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">Services</p>
+          <h2>Clean, consistent, classic.</h2>
+        </div>
+        <p>
+          A playful, polished site using the full Scoop Swift mascot set: the superhero dog,
+          yard scene, question pup, grass accent, and yellow action marks.
+        </p>
+      </div>
+
+      <div class="services-grid">
+        <article class="service-box">
+          <h3>Weekly Service</h3>
+          <p>Keep your yard fresh with recurring visits and reliable cleanup.</p>
+          <img class="service-art" src="image (22).png" alt="Grass accent illustration" />
+        </article>
+
+        <article class="service-box dark">
+          <h3>One-Time Cleanup</h3>
+          <p>Great for busy weeks, special events, seasonal resets, or move-ins.</p>
+          <img class="service-art" src="image (23).png" alt="Curious Scoop Swift dog mascot" />
+        </article>
+
+        <article class="service-box">
+          <h3>Local & Reliable</h3>
+          <p>Friendly service, easy communication, and a cleaner outdoor space.</p>
+          <img class="service-art" src="image (25).png" alt="Yellow action marks" />
+        </article>
+      </div>
+
+      <div class="yard-band">
+        <div class="yard-band-copy">
+          <h3>Fresh yards without the hassle.</h3>
+          <p>Use the yard illustration as a warm visual break between service details and quote options.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-cream" id="plans">
+    <img class="grass-accent" src="image (22).png" alt="Decorative grass accent" />
+    <div class="container">
+      <div class="center-heading">
+        <p class="section-label">Services</p>
+        <h2>Choose the cleanup schedule that fits your yard.</h2>
+      </div>
+
+      <div class="service-plans-grid">
+        <article class="service-plan-card featured">
+          <div>
+            <h3>Weekly Service</h3>
+            <p>Perfect for maintaining a consistently clean yard.</p>
+          </div>
+          <a class="btn btn-yellow" href="#contact">Call for a Free Quote</a>
+          <img src="image (25).png" alt="Decorative action marks" />
+        </article>
+
+        <article class="service-plan-card">
+          <div>
+            <h3>Twice Weekly Service</h3>
+            <p>Best for households with multiple dogs or heavy usage.</p>
+          </div>
+          <a class="btn btn-blue" href="#contact">Call for a Free Quote</a>
+          <img src="image (22).png" alt="Decorative grass" />
+        </article>
+
+        <article class="service-plan-card">
+          <div>
+            <h3>Bi-Weekly Service</h3>
+            <p>A balanced option for moderate needs.</p>
+          </div>
+          <a class="btn btn-blue" href="#contact">Call for a Free Quote</a>
+          <img src="image (23).png" alt="Decorative mascot" />
+        </article>
+
+        <article class="service-plan-card">
+          <div>
+            <h3>Monthly Service</h3>
+            <p>Great for light maintenance.</p>
+          </div>
+          <a class="btn btn-blue" href="#contact">Call for a Free Quote</a>
+          <img src="image (22).png" alt="Decorative grass" />
+        </article>
+
+        <article class="service-plan-card">
+          <div>
+            <h3>One-Time Cleanup</h3>
+            <p>Ideal for getting your yard back under control.</p>
+          </div>
+          <a class="btn btn-blue" href="#contact">Call for a Free Quote</a>
+          <img src="image (25).png" alt="Decorative action marks" />
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="service-area" id="service-area">
+    <div class="container service-area-grid">
+      <div class="area-card">
+        <p class="section-label">Service Area</p>
+        <h2>Proudly serving Chambersburg and surrounding areas.</h2>
+        <p style="color:#000;">
+          Scoop Swift serves Chambersburg, PA and nearby communities, including Shippensburg,
+          Waynesboro, Fayetteville, Greencastle, St. Thomas, Marion, and Scotland.
+        </p>
+
+        <ul class="location-list" aria-label="Scoop Swift service locations">
+          <li>Chambersburg</li>
+          <li>Shippensburg</li>
+          <li>Waynesboro</li>
+          <li>Fayetteville</li>
+          <li>Greencastle</li>
+          <li>St. Thomas</li>
+          <li>Marion</li>
+          <li>Scotland</li>
+        </ul>
+
+        <div class="area-note">
+          <span>📍</span>
+          <p>Not sure if you are inside the service area? Send your ZIP code and we will confirm availability.</p>
+        </div>
+      </div>
+
+      <div class="map-card" aria-label="Map of Chambersburg and surrounding service areas">
+        <div id="serviceMap"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="container contact-grid">
+      <div>
+        <p class="section-label">Contact us</p>
+        <h2>Drop us a line.</h2>
+        <p class="contact-copy">
+          Use this section for service area details, email list signups, quote requests,
+          and launch announcements.
+        </p>
+
+        <img class="contact-mascot" src="image (23).png" alt="Scoop Swift dog looking at a question mark" />
+
+        
+      </div>
+
+      <form class="quote-form" action="#" method="post">
+        <div class="form-grid">
+          <input type="text" name="name" placeholder="Name" required />
+          <input type="email" name="email" placeholder="Email" required />
+          <input class="full" type="text" name="zip" placeholder="Neighborhood / ZIP" />
+          <select class="full" name="service">
+            <option value="">Service interested in</option>
+            <option>Weekly Service</option>
+            <option>Twice Weekly Service</option>
+            <option>Bi-Weekly Service</option>
+            <option>Monthly Service</option>
+            <option>One-Time Cleanup</option>
+          </select>
+          <textarea name="message" placeholder="Tell us about your pets and cleanup needs"></textarea>
+        </div>
+        <button class="btn btn-blue" type="submit" style="width: 100%; margin-top: 18px;">Send Request</button>
+        
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footer-inner">
+      <a href="#" class="logo" aria-label="Scoop Swift home">
+        <img src="image (26).png" alt="Scoop Swift logo" />
+      </a>
+      <p class="copyright">© 2026 Scoop Swift. All rights reserved.</p>
+    </div>
+  </footer>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      if (!window.L) {
+        const mapEl = document.getElementById("serviceMap");
+        if (mapEl) {
+          mapEl.innerHTML = '<div style="display:grid;place-items:center;height:100%;min-height:430px;padding:24px;text-align:center;font-weight:900;color:#021b4d;background:#f4ebd2;">Map could not load. Please check your internet connection or Leaflet CDN access.</div>';
+        }
+        return;
+      }
+
+    const serviceLocations = [
+      { name: "Chambersburg", coords: [39.9376, -77.6611], primary: true },
+      { name: "Shippensburg", coords: [40.0506, -77.5203] },
+      { name: "Waynesboro", coords: [39.7559, -77.5778] },
+      { name: "Fayetteville", coords: [39.9118, -77.5494] },
+      { name: "Greencastle", coords: [39.7904, -77.7278] },
+      { name: "St. Thomas", coords: [39.9159, -77.7989] },
+      { name: "Marion", coords: [39.8612, -77.6961] },
+      { name: "Scotland", coords: [39.9687, -77.5872] }
+    ];
+
+    const map = L.map("serviceMap", {
+      scrollWheelZoom: false
+    }).setView([39.91, -77.64], 10);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    const blueIcon = L.divIcon({
+      className: "",
+      html: '<div style="width:18px;height:18px;border-radius:50%;background:#005bff;border:4px solid #ffffff;box-shadow:0 4px 12px rgba(2,27,77,.35);"></div>',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9]
+    });
+
+    const yellowIcon = L.divIcon({
+      className: "",
+      html: '<div style="width:24px;height:24px;border-radius:50%;background:#ffc928;border:5px solid #021b4d;box-shadow:0 4px 14px rgba(2,27,77,.38);"></div>',
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
+    });
+
+    const bounds = [];
+
+    serviceLocations.forEach((location) => {
+      bounds.push(location.coords);
+      L.marker(location.coords, { icon: location.primary ? yellowIcon : blueIcon })
+        .addTo(map)
+        .bindPopup(`<strong>${location.name}</strong><br>Scoop Swift service area`);
+    });
+
+    L.circle([39.9376, -77.6611], {
+      radius: 26000,
+      color: "#005bff",
+      weight: 2,
+      fillColor: "#005bff",
+      fillOpacity: 0.08
+    }).addTo(map);
+
+    map.fitBounds(bounds, { padding: [28, 28] });
+
+    setTimeout(function () {
+      map.invalidateSize();
+    }, 200);
+    });
+  </script>
+</body>
+</html>
