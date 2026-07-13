@@ -1,0 +1,10 @@
+const navToggle=document.querySelector('.nav-toggle');
+const primaryNav=document.querySelector('.primary-nav');
+navToggle?.addEventListener('click',()=>{const open=navToggle.getAttribute('aria-expanded')==='true';navToggle.setAttribute('aria-expanded',String(!open));navToggle.classList.toggle('open',!open);primaryNav.classList.toggle('open',!open)});
+primaryNav?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{navToggle?.setAttribute('aria-expanded','false');navToggle?.classList.remove('open');primaryNav.classList.remove('open')}));
+document.querySelectorAll('.faq-item button').forEach(button=>button.addEventListener('click',()=>{const item=button.closest('.faq-item');const faqPanel=item.closest('.faq-panel');const wasOpen=item.classList.contains('open');faqPanel?.querySelectorAll('.faq-item.open').forEach(openItem=>{openItem.classList.remove('open');openItem.querySelector('button')?.setAttribute('aria-expanded','false')});if(!wasOpen){item.classList.add('open');button.setAttribute('aria-expanded','true')}}));
+document.querySelectorAll('[data-focus-quote]').forEach(button=>button.addEventListener('click',()=>{const form=document.getElementById('quote-form');form?.scrollIntoView({behavior:'smooth',block:'center'});window.setTimeout(()=>form?.querySelector('input')?.focus({preventScroll:true}),550)}));
+const revealObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');revealObserver.unobserve(entry.target)}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(element=>revealObserver.observe(element));
+document.getElementById('quote-form')?.addEventListener('submit',event=>{event.preventDefault();const form=event.currentTarget;const success=form.querySelector('.form-success');const name=new FormData(form).get('name')?.toString().trim();success.textContent=`Thanks${name?`, ${name}`:''}! Your request is ready to be connected to a live booking service.`;form.reset()});
+document.getElementById('year').textContent=new Date().getFullYear();

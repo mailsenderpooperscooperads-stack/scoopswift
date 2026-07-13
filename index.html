@@ -1,1291 +1,328 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scoop Swift | Pet Waste Removal</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <style>
-    :root {
-      --cream: #f4ebd2;
-      --tan: #b08d57;
-      --blue: #005bff;
-      --yellow: #ffc928;
-      --white: #ffffff;
-      --footer-navy: #021b4d;
-      --secondary-navy: #0a2a6b;
-      --ink: #06133a;
-      --soft-shadow: 0 24px 70px rgba(2, 27, 77, 0.18);
-      --card-shadow: 0 14px 35px rgba(2, 27, 77, 0.12);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--cream);
-      color: var(--footer-navy);
-      line-height: 1.5;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    img {
-      max-width: 100%;
-      display: block;
-    }
-
-    .container {
-      width: min(1180px, calc(100% - 40px));
-      margin: 0 auto;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 52px;
-      padding: 0 28px;
-      border: 0;
-      border-radius: 999px;
-      font-size: 15px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 24px rgba(2, 27, 77, 0.16);
-    }
-
-    .btn-blue {
-      background: var(--blue);
-      color: var(--white);
-    }
-
-    .btn-blue:hover {
-      background: var(--secondary-navy);
-    }
-
-    .btn-yellow {
-      background: var(--yellow);
-      color: var(--footer-navy);
-    }
-
-    .btn-outline {
-      background: var(--white);
-      color: var(--footer-navy);
-      border: 2px solid var(--footer-navy);
-    }
-
-    p.section-label {
-      color: var(--yellow)!important;
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-    }
-
-    .nav-wrap {
-      padding: 24px 0 0;
-      position: relative;
-      z-index: 4;
-    }
-
-    .navbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      padding: 14px 20px;
-      background: rgba(255, 255, 255, 0.72);
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      border-radius: 30px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 26px rgba(2, 27, 77, 0.08);
-    }
-
-    .logo img {
-      width: 176px;
-      height: auto;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 34px;
-      font-size: 13px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .nav-links a:hover {
-      color: var(--blue);
-    }
-
-    .hero {
-      position: relative;
-      overflow: hidden;
-      padding: 18px 0 96px;
-      background:
-        linear-gradient(90deg, rgba(244, 235, 210, 0.95) 0%, rgba(244, 235, 210, 0.86) 45%, rgba(244, 235, 210, 0.64) 100%),
-        url("image (24).png") center bottom / cover no-repeat;
-    }
-
-    .hero::before,
-    .hero::after {
-      content: "";
-      position: absolute;
-      border-radius: 999px;
-      filter: blur(34px);
-      pointer-events: none;
-    }
-
-    .hero::before {
-      width: 180px;
-      height: 180px;
-      left: 5%;
-      top: 140px;
-      background: rgba(255, 255, 255, 0.55);
-    }
-
-    .hero::after {
-      width: 220px;
-      height: 220px;
-      right: 6%;
-      top: 90px;
-      background: rgba(255, 201, 40, 0.32);
-    }
-
-    .accent-bursts {
-      position: absolute;
-      top: 126px;
-      left: 50%;
-      z-index: 1;
-      width: min(560px, 70vw);
-      transform: translateX(-50%);
-      opacity: 0.95;
-      pointer-events: none;
-    }
-
-    .hero-grid {
-      position: relative;
-      z-index: 2;
-      display: grid;
-      grid-template-columns: 1.02fr 0.98fr;
-      align-items: center;
-      gap: 54px;
-      padding-top: 82px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 22px;
-      padding: 10px 16px;
-      border-radius: 999px;
-      background: var(--white);
-      color: var(--secondary-navy);
-      font-size: 13px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      box-shadow: 0 8px 20px rgba(2, 27, 77, 0.08);
-    }
-
-    .badge span {
-      color: var(--yellow);
-      font-size: 18px;
-    }
-
-    h1 {
-      max-width: 760px;
-      font-size: clamp(46px, 7vw, 82px);
-      line-height: 0.94;
-      font-weight: 1000;
-      letter-spacing: -0.07em;
-      color: var(--footer-navy);
-    }
-
-    .hero-copy {
-      max-width: 650px;
-      margin-top: 24px;
-      font-size: 19px;
-      font-weight: 700;
-      color: rgba(10, 42, 107, 0.84);
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 34px;
-    }
-
-    .trust-list {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      max-width: 600px;
-      margin-top: 28px;
-      font-size: 14px;
-      font-weight: 900;
-    }
-
-    .trust-list li {
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .check {
-      display: inline-grid;
-      place-items: center;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--blue);
-      color: var(--white);
-      font-size: 12px;
-      flex: 0 0 auto;
-    }
-
-    .hero-mascot-wrap {
-      position: relative;
-      min-height: 560px;
-    }
-
-    .hero-mascot {
-      position: absolute;
-      right: -8px;
-      bottom: 0;
-      z-index: 2;
-      width: min(520px, 100%);
-      filter: drop-shadow(0 28px 24px rgba(2, 27, 77, 0.18));
-    }
-
-    .floating-card {
-      position: absolute;
-      left: 0;
-      bottom: 42px;
-      z-index: 3;
-      width: min(290px, 70%);
-      padding: 18px;
-      border-radius: 28px;
-      background: var(--white);
-      box-shadow: var(--soft-shadow);
-    }
-
-    .floating-card strong {
-      display: block;
-      font-size: 20px;
-      font-weight: 1000;
-      letter-spacing: -0.04em;
-    }
-
-    .floating-card p {
-      margin-top: 4px;
-      color: rgba(10, 42, 107, 0.78);
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .section-white {
-      background: var(--white);
-      padding: 88px 0;
-    }
-
-    .section-cream {
-      position: relative;
-      overflow: hidden;
-      background: var(--cream);
-      padding: 88px 0;
-    }
-
-    .section-heading {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 32px;
-      margin-bottom: 42px;
-    }
-
-    .section-heading h2,
-    .center-heading h2 {
-      margin-top: 10px;
-      font-size: clamp(36px, 5vw, 56px);
-      line-height: 0.98;
-      font-weight: 1000;
-      letter-spacing: -0.06em;
-    }
-
-    .section-heading p {
-      max-width: 560px;
-      color: rgba(10, 42, 107, 0.8);
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .services-grid,
-    .plans-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 22px;
-    }
-
-    .service-plans-grid {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .service-box,
-    .plan-card {
-      border-radius: 32px;
-      background: var(--white);
-      box-shadow: var(--card-shadow);
-    }
-
-    .service-box {
-      position: relative;
-      min-height: 330px;
-      overflow: hidden;
-      padding: 32px;
-      border: 2px solid var(--cream);
-      box-shadow: none;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .service-box:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--card-shadow);
-    }
-
-    .service-box h3,
-    .plan-card h3 {
-      position: relative;
-      z-index: 2;
-      font-size: 26px;
-      font-weight: 1000;
-      letter-spacing: -0.04em;
-    }
-
-    .service-box p,
-    .plan-card p {
-      position: relative;
-      z-index: 2;
-      margin-top: 12px;
-      color: rgba(10, 42, 107, 0.8);
-      font-weight: 700;
-    }
-
-    .service-art {
-      position: absolute;
-      right: 18px;
-      bottom: 14px;
-      z-index: 1;
-      max-width: 72%;
-      max-height: 180px;
-      object-fit: contain;
-      filter: drop-shadow(0 18px 16px rgba(2, 27, 77, 0.12));
-    }
-
-    .service-box.dark {
-      background: var(--footer-navy);
-      color: var(--white);
-      border-color: var(--footer-navy);
-    }
-
-    .service-box.dark p {
-      color: rgba(255, 255, 255, 0.78);
-    }
-
-    .service-box.dark .service-art {
-      max-width: 60%;
-    }
-
-    .yard-band {
-      position: relative;
-      margin-top: 44px;
-      overflow: hidden;
-      min-height: 230px;
-      border: 8px solid var(--white);
-      border-radius: 36px;
-      background: url("image (24).png") center / cover no-repeat;
-      box-shadow: var(--card-shadow);
-          display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    }
-
-    .yard-band::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, rgba(244, 235, 210, 0.18), rgba(244, 235, 210, 0.66));
-    }
-
-    .yard-band-copy {
-      position: relative;
-      z-index: 1; 
-      padding: 34px;
-    }
-
-    .yard-band-copy h3 {
-      font-size: 34px;
-      line-height: 1;
-      font-weight: 1000;
-      letter-spacing: -0.05em;
-    }
-
-    .yard-band-copy p {
-      margin-top: 12px;
-      color: rgba(10, 42, 107, 0.82);
-      font-weight: 800;
-    }
-
-    .center-heading {
-      max-width: 720px;
-      margin: 0 auto 44px;
-      text-align: center;
-    }
-
-    .plans-grid {
-      position: relative;
-      z-index: 1;
-    }
-
-    .grass-accent {
-      position: absolute;
-      right: 7%;
-      top: 32px;
-      width: 150px;
-      opacity: 0.9;
-      pointer-events: none;
-    }
-
-    .plan-card {
-      padding: 34px;
-      border: 2px solid var(--white);
-    }
-
-    .service-plan-card {
-      position: relative;
-      overflow: hidden;
-      min-height: 270px;
-      padding: 28px;
-      border: 2px solid var(--white);
-      border-radius: 32px;
-      background: var(--white);
-      box-shadow: var(--card-shadow);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .service-plan-card.featured {
-      background: var(--footer-navy);
-      color: var(--white);
-      border-color: var(--yellow);
-    }
-
-    .service-plan-card h3 {
-      position: relative;
-      z-index: 2;
-      font-size: 24px;
-      line-height: 1;
-      font-weight: 1000;
-      letter-spacing: -0.04em;
-    }
-
-    .service-plan-card p {
-      position: relative;
-      z-index: 2;
-      margin-top: 12px;
-      color: rgba(10, 42, 107, 0.82);
-      font-weight: 800;
-    }
-
-    .service-plan-card.featured p {
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    .service-plan-card .btn {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      margin-top: 24px;
-      padding: 0 16px;
-      font-size: 13px;
-    }
-
-    .service-plan-card img {
-      position: absolute;
-      right: -20px;
-      bottom: -18px;
-      width: 130px;
-      opacity: 0.16;
-      pointer-events: none;
-    }
-
-    .service-plan-card.featured img {
-      opacity: 0.2;
-    }
-
-    .plan-card.featured {
-      background: var(--footer-navy);
-      color: var(--white);
-      border-color: var(--yellow);
-      transform: scale(1.02);
-    }
-
-    .plan-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 28px;
-    }
-
-    .plan-top img {
-      width: 58px;
-      height: 58px;
-      object-fit: contain;
-    }
-
-    .plan-pill {
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: var(--cream);
-      color: var(--footer-navy);
-      font-size: 13px;
-      font-weight: 1000;
-      text-transform: uppercase;
-    }
-
-    .featured .plan-pill {
-      background: var(--yellow);
-    }
-
-    .featured p {
-      color: rgba(255, 255, 255, 0.8);
-    }
-
-    .plan-card .btn {
-      width: 100%;
-      margin-top: 30px;
-    }
-
-    .service-area {
-      position: relative;
-      overflow: hidden;
-      background: var(--white);
-      padding: 88px 0;
-    }
-
-    .service-area::before {
-      content: "";
-      position: absolute;
-      left: -110px;
-      top: -120px;
-      width: 340px;
-      height: 340px;
-      border-radius: 50%;
-      background: rgba(255, 201, 40, 0.22);
-    }
-
-    .service-area-grid {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-columns: 0.92fr 1.08fr;
-      gap: 36px;
-      align-items: stretch;
-    }
-
-    .area-card,
-    .map-card {
-      border-radius: 36px;
-      background: var(--cream);
-      box-shadow: var(--card-shadow);
-    }
-
-    .area-card {
-      padding: 36px;
-      border: 2px solid rgba(176, 141, 87, 0.22);
-    }
-
-    .area-card h2 {
-      margin-top: 10px;
-      font-size: clamp(36px, 5vw, 54px);
-      line-height: 0.98;
-      font-weight: 1000;
-      letter-spacing: -0.06em;
-    }
-
-    .area-card p {
-      margin-top: 18px;
-      color:#fff;
-      font-size: 18px;
-      font-weight: 800;
-    }
-
-    .location-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 26px;
-      list-style: none;
-    }
-
-    .location-list li {
-      padding: 10px 14px;
-      border: 2px solid var(--white);
-      border-radius: 999px;
-      background: var(--white);
-      color: var(--footer-navy);
-      font-size: 14px;
-      font-weight: 900;
-      box-shadow: 0 8px 16px rgba(2, 27, 77, 0.06);
-    }
-
-    .location-list li:first-child {
-      background: var(--yellow);
-      border-color: var(--yellow);
-    }
-
-    .area-note {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 28px;
-      padding: 16px;
-      border-radius: 24px;
-      background: var(--footer-navy);
-      color: var(--white);
-      font-size: 14px;
-      font-weight: 800;
-      color: #fff !important;;
-    }
-
-    .area-note span {
-      display: grid;
-      place-items: center;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: var(--yellow);
-      color: var(--footer-navy);
-      flex: 0 0 auto;
-    }
-
-    .map-card {
-      overflow: hidden;
-      min-height: 430px;
-      border: 8px solid var(--cream);
-      background: var(--footer-navy);
-    }
-
-    #serviceMap {
-      width: 100%;
-      height: 100%;
-      min-height: 430px;
-      border-radius: 28px;
-      overflow: hidden;
-      background: var(--cream);
-    }
-
-    .leaflet-popup-content-wrapper,
-    .leaflet-popup-tip {
-      color: var(--footer-navy);
-      font-family: Arial, Helvetica, sans-serif;
-      font-weight: 800;
-    }
-
-    .leaflet-control-attribution {
-      font-size: 10px;
-    }
-
-    .contact {
-      position: relative;
-      overflow: hidden;
-      background: var(--footer-navy);
-      color: var(--white);
-      padding: 88px 0;
-    }
-
-    .contact::after {
-      content: "";
-      position: absolute;
-      right: -80px;
-      bottom: -110px;
-      width: 430px;
-      height: 430px;
-      border-radius: 50%;
-      background: rgba(0, 91, 255, 0.18);
-    }
-
-    .contact-grid {
-      position: relative;
-      z-index: 1;
-      display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
-      gap: 54px;
-      align-items: start;
-    }
-
-    .contact .section-label {
-      color: var(--yellow);
-    }
-
-    .contact h2 {
-      margin-top: 10px;
-      font-size: clamp(38px, 5vw, 58px);
-      line-height: 0.98;
-      font-weight: 1000;
-      letter-spacing: -0.06em;
-    }
-
-    .contact-copy {
-      max-width: 520px;
-      margin-top: 20px;
-      color: rgba(255, 255, 255, 0.76);
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .contact-mascot {
-      width: min(280px, 70%);
-      margin-top: 28px;
-      filter: drop-shadow(0 18px 18px rgba(0, 0, 0, 0.22));
-    }
-
-    .contact-list {
-      margin-top: 28px;
-      display: grid;
-      gap: 16px;
-      color: rgba(255, 255, 255, 0.86);
-      font-weight: 800;
-      list-style: none;
-    }
-
-    .contact-list span {
-      color: var(--yellow);
-      margin-right: 8px;
-    }
-
-    .quote-form {
-      padding: 34px;
-      border-radius: 32px;
-      background: var(--white);
-      color: var(--footer-navy);
-      box-shadow: var(--soft-shadow);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    input,
-    textarea,
-    select {
-      width: 100%;
-      border: 2px solid var(--cream);
-      border-radius: 18px;
-      padding: 16px 18px;
-      color: var(--footer-navy);
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 700;
-      outline: none;
-      transition: border 0.2s ease;
-    }
-
-    input:focus,
-    textarea:focus,
-    select:focus {
-      border-color: var(--blue);
-    }
-
-    textarea,
-    .full {
-      grid-column: 1 / -1;
-    }
-
-    textarea {
-      min-height: 126px;
-      resize: vertical;
-    }
-
-    .form-note {
-      margin-top: 16px;
-      text-align: center;
-      color: rgba(10, 42, 107, 0.72);
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    footer {
-      background: #010f2c;
-      color: var(--white);
-      padding: 28px 0;
-    }
-
-    .footer-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    footer .logo img {
-      width: 156px;
-    }
-
-    .copyright {
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    @media (max-width: 920px) {
-      .nav-links {
-        display: none;
-      }
-
-      .hero-grid,
-      .contact-grid,
-      .service-area-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero-mascot-wrap {
-        min-height: 460px;
-      }
-
-      .hero-mascot {
-        right: 0;
-        width: min(460px, 96%);
-      }
-
-      .section-heading {
-        display: block;
-      }
-
-      .section-heading p {
-        margin-top: 18px;
-      }
-
-      .services-grid,
-      .plans-grid,
-      .service-plans-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .plan-card.featured {
-        transform: none;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .container {
-        width: min(100% - 28px, 1180px);
-      }
-
-      .navbar {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-
-      .navbar .btn {
-        width: 100%;
-      }
-
-      .logo img {
-        width: 150px;
-      }
-
-      .hero {
-        padding-bottom: 64px;
-      }
-
-      .accent-bursts {
-        display: none;
-      }
-
-      .hero-grid {
-        padding-top: 58px;
-      }
-
-      .hero-actions,
-      .trust-list {
-        grid-template-columns: 1fr;
-      }
-
-      .hero-actions .btn {
-        width: 100%;
-      }
-
-      .hero-mascot-wrap {
-        min-height: 390px;
-      }
-
-      .floating-card {
-        left: 0;
-        bottom: 8px;
-        width: 78%;
-      }
-
-      .section-white,
-      .section-cream,
-      .service-area,
-      .contact {
-        padding: 66px 0;
-      }
-
-      .service-box {
-        min-height: 300px;
-      }
-
-      .yard-band-copy {
-        padding: 24px;
-      }
-
-      .area-card {
-        padding: 26px;
-      }
-
-      .map-card,
-      #serviceMap {
-        min-height: 340px;
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .footer-inner {
-        align-items: flex-start;
-        flex-direction: column;
-      }
-    }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ScoopSwift pet waste removal services for Chambersburg and surrounding communities.">
+  <title>ScoopSwift | Pet Waste Removal</title>
+  <script>document.documentElement.classList.add('js');</script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
-  <header class="hero">
-    <img class="accent-bursts" src="image (25).png" alt="Decorative yellow action marks" />
+  <a class="skip-link" href="#main">Skip to content</a>
 
-    <div class="nav-wrap">
-      <nav class="navbar container" aria-label="Main navigation">
-        <a href="#" class="logo" aria-label="Scoop Swift home">
-          <img src="image (26).png" alt="Scoop Swift logo" />
-        </a>
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="#home" aria-label="ScoopSwift home">
+        <img src="assets/scoop-swift-logo.png" alt="ScoopSwift Pet Waste Removal Service">
+      </a>
 
-        <div class="nav-links">
-          <a href="#services">Services</a>
-          <a href="#plans">Plans</a>
-          <a href="#contact">Contact</a>
-          <a href="#service-area">Service Area</a>
-        </div>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">
+        <span></span><span></span><span></span>
+        <span class="sr-only">Toggle menu</span>
+      </button>
 
-        <a class="btn btn-blue" href="#contact">Get My Quote</a>
+      <nav class="primary-nav" id="primary-nav" aria-label="Primary navigation">
+        <a href="#why">Why choose us</a>
+        <a href="#services">Services</a>
+        <a href="#areas">Service area</a>
+        <a href="#faq">FAQ</a>
+        <a class="button button-small" href="#quote">Get my quote</a>
       </nav>
-    </div>
-
-    <div class="hero-grid container">
-      <div class="hero-content">
-        <div class="badge"><span>✦</span> Clean yards. Happy pets. Zero hassle.</div>
-        <h1>Swift pet waste removal for a yard you can enjoy again.</h1>
-        <p class="hero-copy">
-          Scoop Swift helps busy pet owners keep their lawns clean with dependable weekly service,
-          one-time cleanups, and simple quote requests.
-        </p>
-
-        <div class="hero-actions">
-          <a class="btn btn-blue" href="#contact">Get My Quote</a>
-          <a class="btn btn-outline" href="#plans">Choose Plan</a>
-        </div>
-
-        <ul class="trust-list" aria-label="Service highlights">
-          <li><span class="check">✓</span> Fast & easy</li>
-          <li><span class="check">✓</span> No obligations</li>
-          <li><span class="check">✓</span> Local & reliable</li>
-        </ul>
-      </div>
-
-      <div class="hero-mascot-wrap" aria-label="Scoop Swift mascot illustration">
-        <img class="hero-mascot" src="image (20).png" alt="Scoop Swift superhero dog mascot" />
-        <div class="floating-card">
-          <strong>Super clean, super swift.</strong>
-          <p>Book recurring service or a one-time yard reset in just a few clicks.</p>
-        </div>
-      </div>
     </div>
   </header>
 
-  <section class="section-white" id="services">
-    <div class="container">
-      <div class="section-heading">
-        <div>
-          <p class="section-label">Services</p>
-          <h2>Clean, consistent, classic.</h2>
+  <main id="main">
+    <section class="hero section" id="home">
+      <div class="cloud cloud-one" aria-hidden="true"></div>
+      <div class="cloud cloud-two" aria-hidden="true"></div>
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Your yard. Clean, simple, stress-free.</p>
+          <h1>Pet waste removal made simple in <span>Chambersburg</span></h1>
+          <p class="hero-lead">Less mess. More time. Happier dogs. We keep your yard clean so you can enjoy the outdoors without the unpleasant chores.</p>
+          <div class="hero-actions">
+            <a class="button" href="#quote">Get my free quote</a>
+            <a class="text-link" href="#services">See our services <span aria-hidden="true">→</span></a>
+          </div>
+          <ul class="trust-list" aria-label="Service benefits">
+            <li><span aria-hidden="true">✓</span> Fast and easy</li>
+            <li><span aria-hidden="true">✓</span> No obligations</li>
+            <li><span aria-hidden="true">✓</span> Local and reliable</li>
+          </ul>
         </div>
-        <p>
-          A playful, polished site using the full Scoop Swift mascot set: the superhero dog,
-          yard scene, question pup, grass accent, and yellow action marks.
-        </p>
-      </div>
 
-      <div class="services-grid">
-        <article class="service-box">
-          <h3>Weekly Service</h3>
-          <p>Keep your yard fresh with recurring visits and reliable cleanup.</p>
-          <img class="service-art" src="image (22).png" alt="Grass accent illustration" />
-        </article>
-
-        <article class="service-box dark">
-          <h3>One-Time Cleanup</h3>
-          <p>Great for busy weeks, special events, seasonal resets, or move-ins.</p>
-          <img class="service-art" src="image (23).png" alt="Curious Scoop Swift dog mascot" />
-        </article>
-
-        <article class="service-box">
-          <h3>Local & Reliable</h3>
-          <p>Friendly service, easy communication, and a cleaner outdoor space.</p>
-          <img class="service-art" src="image (25).png" alt="Yellow action marks" />
-        </article>
-      </div>
-
-      <div class="yard-band">
-        <div class="yard-band-copy">
-          <h3>Fresh yards without the hassle.</h3>
-          <p>Use the yard illustration as a warm visual break between service details and quote options.</p>
+        <div class="hero-art reveal" aria-label="ScoopSwift superhero dog mascot">
+          <div class="hero-ring"></div>
+          <img src="assets/scoop-swift-mascot.png" alt="ScoopSwift superhero dog flying">
+          <div class="hero-badge">
+            <strong>Fresh yard</strong>
+            <span>Happy pup</span>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+      <div class="grass-line" aria-hidden="true"></div>
+    </section>
 
-  <section class="section-cream" id="plans">
-    <img class="grass-accent" src="image (22).png" alt="Decorative grass accent" />
-    <div class="container">
-      <div class="center-heading">
-        <p class="section-label">Services</p>
-        <h2>Choose the cleanup schedule that fits your yard.</h2>
+    <section class="section yards" aria-labelledby="yards-title">
+      <div class="container yards-grid">
+        <div class="yard-illustration reveal" aria-hidden="true">
+          <div class="sun"></div>
+          <div class="bush bush-a"></div>
+          <div class="bush bush-b"></div>
+          <div class="fence"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="pet-bowl"><span>★</span></div>
+        </div>
+        <div class="reveal">
+          <p class="eyebrow">We make clean yards easy</p>
+          <h2 id="yards-title">A cleaner yard without adding another chore to your list</h2>
+          <p>We know life gets busy. Our friendly technicians arrive on schedule, thoroughly clean your property, secure the gate, and leave your space ready for playtime.</p>
+          <div class="check-grid">
+            <div><span>01</span><p>Simple recurring plans</p></div>
+            <div><span>02</span><p>Careful gate checks</p></div>
+            <div><span>03</span><p>Service notifications</p></div>
+            <div><span>04</span><p>Friendly local team</p></div>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="service-plans-grid">
-        <article class="service-plan-card featured">
-          <div>
-            <h3>Weekly Service</h3>
+    <section class="section why" id="why" aria-labelledby="why-title">
+      <div class="container">
+        <div class="section-heading centered reveal">
+          <p class="eyebrow">Why choose ScoopSwift?</p>
+          <h2 id="why-title">We make pet ownership easier—one clean yard at a time</h2>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature-card reveal">
+            <div class="icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+            </div>
+            <h3>Reliable, on-time service</h3>
+            <p>We arrive when we say we will and keep your service day predictable.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 5 5"></path><path d="M8 11l2 2 4-5"></path></svg>
+            </div>
+            <h3>No missed spots</h3>
+            <p>Our detailed multi-pass approach helps make sure the yard is fully covered.</p>
+          </article>
+          <article class="feature-card reveal">
+            <div class="icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 7h10"></path><path d="M4 17h16"></path><path d="M14 7l3-3"></path><path d="M14 7l3 3"></path><path d="M10 17l-3-3"></path><path d="M10 17l-3 3"></path></svg>
+            </div>
+            <h3>Flexible service options</h3>
+            <p>Choose the frequency that works best for your household and pet routine.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section services" id="services" aria-labelledby="services-title">
+      <div class="container">
+        <div class="section-heading reveal">
+          <p class="eyebrow">Our services</p>
+          <h2 id="services-title">No hidden fees or contracts—just clean, simple pricing</h2>
+          <p>Pick the plan that suits your yard. We can help you choose after a quick quote.</p>
+        </div>
+
+        <div class="service-grid">
+          <article class="service-card reveal">
+            <div class="service-icon" aria-hidden="true">✓</div>
+            <p class="plan-kicker">Most popular</p>
+            <h3>Weekly service</h3>
             <p>Perfect for maintaining a consistently clean yard.</p>
-          </div>
-          <a class="btn btn-yellow" href="#contact">Call for a Free Quote</a>
-          <img src="image (25).png" alt="Decorative action marks" />
-        </article>
+            <ul><li>One scheduled visit each week</li><li>Thorough yard cleanup</li><li>Gate and service confirmation</li></ul>
+            <a class="button button-outline" href="#quote">Choose plan</a>
+          </article>
 
-        <article class="service-plan-card">
-          <div>
-            <h3>Twice Weekly Service</h3>
-            <p>Best for households with multiple dogs or heavy usage.</p>
-          </div>
-          <a class="btn btn-blue" href="#contact">Call for a Free Quote</a>
-          <img src="image (22).png" alt="Decorative grass" />
-        </article>
+          <article class="service-card reveal">
+            <div class="service-icon" aria-hidden="true">✓</div>
+            <p class="plan-kicker">Extra fresh</p>
+            <h3>Twice-weekly service</h3>
+            <p>Best for households with multiple dogs or heavy yard use.</p>
+            <ul><li>Two scheduled visits each week</li><li>Great for multiple pets</li><li>Consistent odor control</li></ul>
+            <a class="button button-outline" href="#quote">Choose plan</a>
+          </article>
 
-        <article class="service-plan-card">
-          <div>
-            <h3>Bi-Weekly Service</h3>
-            <p>A balanced option for moderate needs.</p>
-          </div>
-          <a class="btn btn-blue" href="#contact">Call for a Free Quote</a>
-          <img src="image (23).png" alt="Decorative mascot" />
-        </article>
+          <article class="service-card reveal">
+            <div class="service-icon" aria-hidden="true">✓</div>
+            <p class="plan-kicker">Budget friendly</p>
+            <h3>Bi-weekly service</h3>
+            <p>A balanced option for moderate yard use and smaller households.</p>
+            <ul><li>Service every other week</li><li>Careful full-yard sweep</li><li>Easy recurring schedule</li></ul>
+            <a class="button button-outline" href="#quote">Choose plan</a>
+          </article>
 
-        <article class="service-plan-card">
-          <div>
-            <h3>Monthly Service</h3>
-            <p>Great for light maintenance.</p>
-          </div>
-          <a class="btn btn-blue" href="#contact">Call for a Free Quote</a>
-          <img src="image (22).png" alt="Decorative grass" />
-        </article>
-
-        <article class="service-plan-card">
-          <div>
-            <h3>One-Time Cleanup</h3>
-            <p>Ideal for getting your yard back under control.</p>
-          </div>
-          <a class="btn btn-blue" href="#contact">Call for a Free Quote</a>
-          <img src="image (25).png" alt="Decorative action marks" />
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section class="service-area" id="service-area">
-    <div class="container service-area-grid">
-      <div class="area-card">
-        <p class="section-label">Service Area</p>
-        <h2>Proudly serving Chambersburg and surrounding areas.</h2>
-        <p style="color:#000;">
-          Scoop Swift serves Chambersburg, PA and nearby communities, including Shippensburg,
-          Waynesboro, Fayetteville, Greencastle, St. Thomas, Marion, and Scotland.
-        </p>
-
-        <ul class="location-list" aria-label="Scoop Swift service locations">
-          <li>Chambersburg</li>
-          <li>Shippensburg</li>
-          <li>Waynesboro</li>
-          <li>Fayetteville</li>
-          <li>Greencastle</li>
-          <li>St. Thomas</li>
-          <li>Marion</li>
-          <li>Scotland</li>
-        </ul>
-
-        <div class="area-note">
-          <span>📍</span>
-          <p>Not sure if you are inside the service area? Send your ZIP code and we will confirm availability.</p>
+          <article class="service-card reveal">
+            <div class="service-icon" aria-hidden="true">✓</div>
+            <p class="plan-kicker">As needed</p>
+            <h3>Monthly or one-time cleanup</h3>
+            <p>Ideal for seasonal resets, move-ins, events, or catching up.</p>
+            <ul><li>Deep cleanup available</li><li>No recurring commitment</li><li>Great before gatherings</li></ul>
+            <a class="button button-outline" href="#quote">Choose plan</a>
+          </article>
         </div>
       </div>
+    </section>
 
-      <div class="map-card" aria-label="Map of Chambersburg and surrounding service areas">
-        <div id="serviceMap"></div>
-      </div>
-    </div>
-  </section>
-
-  <section class="contact" id="contact">
-    <div class="container contact-grid">
-      <div>
-        <p class="section-label">Contact us</p>
-        <h2>Drop us a line.</h2>
-        <p class="contact-copy">
-          Use this section for service area details, email list signups, quote requests,
-          and launch announcements.
-        </p>
-
-        <img class="contact-mascot" src="image (23).png" alt="Scoop Swift dog looking at a question mark" />
-
-        
-      </div>
-
-      <form class="quote-form" action="#" method="post">
-        <div class="form-grid">
-          <input type="text" name="name" placeholder="Name" required />
-          <input type="email" name="email" placeholder="Email" required />
-          <input class="full" type="text" name="zip" placeholder="Neighborhood / ZIP" />
-          <select class="full" name="service">
-            <option value="">Service interested in</option>
-            <option>Weekly Service</option>
-            <option>Twice Weekly Service</option>
-            <option>Bi-Weekly Service</option>
-            <option>Monthly Service</option>
-            <option>One-Time Cleanup</option>
-          </select>
-          <textarea name="message" placeholder="Tell us about your pets and cleanup needs"></textarea>
+    <section class="section areas" id="areas" aria-labelledby="areas-title">
+      <div class="container areas-grid">
+        <div class="areas-copy reveal">
+          <p class="eyebrow">Service area</p>
+          <h2 id="areas-title">Proudly serving Chambersburg and surrounding areas</h2>
+          <p>Our local route serves homes throughout Franklin County and nearby communities.</p>
+          <div class="location-list" aria-label="Communities served">
+            <span>Chambersburg</span><span>Shippensburg</span><span>Waynesboro</span><span>Fayetteville</span><span>Greencastle</span><span>Mont Alto</span><span>Mercersburg</span><span>Scotland</span><span>St. Thomas</span>
+          </div>
         </div>
-        <button class="btn btn-blue" type="submit" style="width: 100%; margin-top: 18px;">Send Request</button>
-        
-      </form>
-    </div>
-  </section>
 
-  <footer>
-    <div class="container footer-inner">
-      <a href="#" class="logo" aria-label="Scoop Swift home">
-        <img src="image (26).png" alt="Scoop Swift logo" />
-      </a>
-      <p class="copyright">© 2026 Scoop Swift. All rights reserved.</p>
+        <div class="map-card reveal" aria-label="Stylized map of the ScoopSwift service area">
+          <svg viewBox="0 0 650 500" role="img" aria-label="Service area map with community markers">
+            <path class="road" d="M-40 110C80 70 170 160 275 128s185-95 450-42"></path>
+            <path class="road" d="M-30 350C130 270 200 390 335 340s180-95 350-120"></path>
+            <path class="road thin" d="M80-40c50 180 5 235 125 330s145 100 165 250"></path>
+            <path class="road thin" d="M470-20c-55 150-20 230 30 315s40 135 22 230"></path>
+            <path class="road thin" d="M-20 225c180 10 270-30 390-5s170 15 310-30"></path>
+            <g class="marker" transform="translate(320 150)"><circle r="15"></circle><circle class="dot" r="5"></circle><text x="25" y="5">Chambersburg</text></g>
+            <g class="marker" transform="translate(428 72)"><circle r="12"></circle><circle class="dot" r="4"></circle><text x="20" y="5">Shippensburg</text></g>
+            <g class="marker" transform="translate(205 215)"><circle r="12"></circle><circle class="dot" r="4"></circle><text x="20" y="5">Scotland</text></g>
+            <g class="marker" transform="translate(468 232)"><circle r="12"></circle><circle class="dot" r="4"></circle><text x="20" y="5">Fayetteville</text></g>
+            <g class="marker" transform="translate(280 320)"><circle r="12"></circle><circle class="dot" r="4"></circle><text x="20" y="5">Greencastle</text></g>
+            <g class="marker" transform="translate(135 370)"><circle r="12"></circle><circle class="dot" r="4"></circle><text x="20" y="5">Mercersburg</text></g>
+            <g class="marker" transform="translate(510 380)"><circle r="12"></circle><circle class="dot" r="4"></circle><text x="20" y="5">Waynesboro</text></g>
+          </svg>
+          <div class="map-note">Not sure you are in range? Send your ZIP code with your quote request.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section quote-section booking" id="quote" aria-labelledby="quote-title">
+      <div class="container booking-grid">
+        <div class="booking-showcase reveal">
+          <p class="mockup-label">6. Book today + stats</p>
+          <div class="booking-card">
+            <div class="booking-card-top">
+              <div class="paw-badge" aria-hidden="true">
+                <svg viewBox="0 0 64 64"><ellipse cx="18" cy="21" rx="8" ry="11"/><ellipse cx="32" cy="15" rx="8" ry="11"/><ellipse cx="46" cy="21" rx="8" ry="11"/><ellipse cx="12" cy="36" rx="7" ry="9"/><path d="M18 48c0-11 7-19 14-19s14 8 14 19c0 7-6 10-14 10s-14-3-14-10Z"/></svg>
+              </div>
+            </div>
+
+            <div class="booking-card-copy">
+              <h2 id="quote-title">Book Your Service Today and Enjoy a Cleaner Yard Tomorrow!</h2>
+              <p>Ready to take the stress out of pet waste cleanup?</p>
+              <button class="button booking-cta" type="button" data-focus-quote>Get my free quote today!</button>
+            </div>
+
+            <div class="booking-stats" aria-label="ScoopSwift customer statistics">
+              <div class="booking-stat">
+                <span class="booking-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9.4-8.3C.5 9.25 2.05 5 6.15 5c2.1 0 3.35 1.16 3.85 2.2C10.5 6.16 11.75 5 13.85 5c4.1 0 5.65 4.25 3.55 7.7C19 16.65 12 21 12 21Z"/></svg></span>
+                <span><strong>57+</strong><small>Cleaned Yards</small></span>
+              </div>
+              <div class="booking-stat">
+                <span class="booking-stat-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9.4-8.3C.5 9.25 2.05 5 6.15 5c2.1 0 3.35 1.16 3.85 2.2C10.5 6.16 11.75 5 13.85 5c4.1 0 5.65 4.25 3.55 7.7C19 16.65 12 21 12 21Z"/></svg></span>
+                <span><strong>16+</strong><small>Happy Clients</small></span>
+              </div>
+              <div class="booking-stat">
+                <span class="booking-stat-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><ellipse cx="18" cy="21" rx="8" ry="11"/><ellipse cx="32" cy="15" rx="8" ry="11"/><ellipse cx="46" cy="21" rx="8" ry="11"/><ellipse cx="12" cy="36" rx="7" ry="9"/><path d="M18 48c0-11 7-19 14-19s14 8 14 19c0 7-6 10-14 10s-14-3-14-10Z"/></svg></span>
+                <span><strong>125+</strong><small>Happy Pets</small></span>
+              </div>
+            </div>
+
+            <div class="booking-mascot-wrap" aria-hidden="true">
+              <span class="grass-doodle grass-left">〽</span>
+              <img class="booking-mascot" src="assets/standing-mascot.png" alt="">
+              <span class="grass-doodle grass-right">〽</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="quote-form-panel reveal">
+          <p class="eyebrow">Free, no-obligation quote</p>
+          <h2>Tell us about your yard</h2>
+          <p class="quote-form-intro">Share a few details and we’ll recommend the service plan that fits your home and pets.</p>
+          <form class="quote-form" id="quote-form">
+            <div class="form-row">
+              <label>Full name<input type="text" name="name" autocomplete="name" required></label>
+              <label>Email address<input type="email" name="email" autocomplete="email" required></label>
+            </div>
+            <div class="form-row">
+              <label>ZIP code<input type="text" name="zip" inputmode="numeric" pattern="[0-9]{5}" placeholder="17201" required></label>
+              <label>Number of dogs<select name="dogs" required><option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4+</option></select></label>
+            </div>
+            <label>Preferred service<select name="service"><option>Help me choose</option><option>Weekly</option><option>Twice weekly</option><option>Bi-weekly</option><option>Monthly</option><option>One-time cleanup</option></select></label>
+            <label>Anything else we should know?<textarea name="message" rows="4" placeholder="Yard size, access notes, preferred start date…"></textarea></label>
+            <button class="button" type="submit">Get my free quote</button>
+            <p class="form-note">This demo form is ready to connect to your email, CRM, or booking service.</p>
+            <p class="form-success" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <section class="section faq" id="faq" aria-labelledby="faq-title">
+      <div class="container">
+        <div class="section-heading centered reveal faq-main-heading">
+          <p class="eyebrow">Questions before you book?</p>
+          <h2 id="faq-title">Frequently Asked Questions</h2>
+        </div>
+
+        <section class="faq-panel faq-panel-single reveal" aria-labelledby="faq-panel-title">
+          <p class="mockup-label">7. FAQ</p>
+          <div class="faq-panel-inner">
+            <h3 id="faq-panel-title" class="faq-panel-title"><span aria-hidden="true">›</span> Frequently Asked Questions <span aria-hidden="true">‹</span></h3>
+
+            <div class="faq-accordion-grid">
+              <div class="accordion">
+                <article class="faq-item"><button type="button" aria-expanded="false"><span>What areas do you service?</span><span class="chevron">⌄</span></button><div class="faq-answer"><p>We serve Chambersburg and many nearby Franklin County communities. Send your ZIP code and we’ll confirm your address.</p></div></article>
+                <article class="faq-item"><button type="button" aria-expanded="false"><span>How do I sign up for service?</span><span class="chevron">⌄</span></button><div class="faq-answer"><p>Complete the quote form and we’ll contact you to confirm your plan, service day, gate access, and start date.</p></div></article>
+                <article class="faq-item"><button type="button" aria-expanded="false"><span>How often do you come to clean?</span><span class="chevron">⌄</span></button><div class="faq-answer"><p>Choose weekly, twice-weekly, bi-weekly, monthly, or a one-time cleanup based on your yard and number of dogs.</p></div></article>
+                <article class="faq-item"><button type="button" aria-expanded="false"><span>Do you take the poop with you when you leave?</span><span class="chevron">⌄</span></button><div class="faq-answer"><p>Yes. Waste is securely bagged and removed from your property after each visit unless your plan states otherwise.</p></div></article>
+                <article class="faq-item"><button type="button" aria-expanded="false"><span>Do you offer any additional services?</span><span class="chevron">⌄</span></button><div class="faq-answer"><p>Ask about one-time cleanups, seasonal resets, special-event preparation, and service options for multi-dog homes.</p></div></article>
+              </div>
+
+              <div class="accordion">
+                <article class="faq-item"><button type="button" aria-expanded="false"><span>Do I need to be home during the service?</span><span class="chevron">⌄</span></button><div class="faq-answer"><p>No. As long as we have safe yard access and your pets are secured, we can complete service while you’re away.</p></div></article>
+                <article class="faq-item"><button type="button" aria-expanded="false"><span>Do you clean in the winter?</span><span class="chevron">⌄</span></button><div class="faq-answer"><p>Yes, when conditions are safe. Severe weather, ice, or deep snow may require us to reschedule your visit.</p></div></article>
+                <article class="faq-item"><button type="button" aria-expanded="false"><span>How does billing work?</span><span class="chevron">⌄</span></button><div class="faq-answer"><p>Billing details are confirmed with your quote. Recurring plans can be set up for simple, predictable payments.</p></div></article>
+                <article class="faq-item"><button type="button" aria-expanded="false"><span>Is there a contract or long-term commitment?</span><span class="chevron">⌄</span></button><div class="faq-answer"><p>No long-term contract is required for standard recurring service. We’ll explain any plan-specific terms before you begin.</p></div></article>
+                <article class="faq-item"><button type="button" aria-expanded="false"><span>What happens if my dog is in the yard?</span><span class="chevron">⌄</span></button><div class="faq-answer"><p>For everyone’s safety, please keep dogs indoors during the visit unless another arrangement has been approved in advance.</p></div></article>
+              </div>
+            </div>
+
+            <div class="faq-art-group" aria-hidden="true">
+              <div class="faq-art faq-art-question">
+                <span class="faq-question-mark">?</span>
+                <span class="faq-cloud faq-cloud-left"></span>
+                <img src="assets/faq-question-dog.png" alt="">
+              </div>
+              <div class="faq-art faq-art-happy">
+                <img src="assets/faq-happy-dog.png" alt="">
+                <span class="faq-cloud faq-cloud-right"></span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-cloud footer-cloud-one" aria-hidden="true"></div>
+    <div class="footer-cloud footer-cloud-two" aria-hidden="true"></div>
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <img src="assets/scoop-swift-logo.png" alt="ScoopSwift Pet Waste Removal Service">
+        <p>Proudly serving Chambersburg and surrounding communities.</p>
+        <div class="socials" aria-label="Social links"><a href="#" aria-label="Facebook">f</a><a href="#" aria-label="Instagram">◎</a></div>
+      </div>
+      <div><h2>Services</h2><a href="#services">Weekly pet waste removal</a><a href="#services">Twice-weekly service</a><a href="#services">Bi-weekly service</a><a href="#services">One-time cleanup</a></div>
+      <div><h2>Quick links</h2><a href="#why">About us</a><a href="#areas">Service area</a><a href="#faq">FAQ</a><a href="#quote">Contact us</a></div>
+      <div class="footer-legal"><p>© <span id="year"></span> ScoopSwift.<br>All rights reserved.</p><a href="#">Privacy policy</a></div>
     </div>
   </footer>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      if (!window.L) {
-        const mapEl = document.getElementById("serviceMap");
-        if (mapEl) {
-          mapEl.innerHTML = '<div style="display:grid;place-items:center;height:100%;min-height:430px;padding:24px;text-align:center;font-weight:900;color:#021b4d;background:#f4ebd2;">Map could not load. Please check your internet connection or Leaflet CDN access.</div>';
-        }
-        return;
-      }
-
-    const serviceLocations = [
-      { name: "Chambersburg", coords: [39.9376, -77.6611], primary: true },
-      { name: "Shippensburg", coords: [40.0506, -77.5203] },
-      { name: "Waynesboro", coords: [39.7559, -77.5778] },
-      { name: "Fayetteville", coords: [39.9118, -77.5494] },
-      { name: "Greencastle", coords: [39.7904, -77.7278] },
-      { name: "St. Thomas", coords: [39.9159, -77.7989] },
-      { name: "Marion", coords: [39.8612, -77.6961] },
-      { name: "Scotland", coords: [39.9687, -77.5872] }
-    ];
-
-    const map = L.map("serviceMap", {
-      scrollWheelZoom: false
-    }).setView([39.91, -77.64], 10);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    const blueIcon = L.divIcon({
-      className: "",
-      html: '<div style="width:18px;height:18px;border-radius:50%;background:#005bff;border:4px solid #ffffff;box-shadow:0 4px 12px rgba(2,27,77,.35);"></div>',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
-    });
-
-    const yellowIcon = L.divIcon({
-      className: "",
-      html: '<div style="width:24px;height:24px;border-radius:50%;background:#ffc928;border:5px solid #021b4d;box-shadow:0 4px 14px rgba(2,27,77,.38);"></div>',
-      iconSize: [24, 24],
-      iconAnchor: [12, 12]
-    });
-
-    const bounds = [];
-
-    serviceLocations.forEach((location) => {
-      bounds.push(location.coords);
-      L.marker(location.coords, { icon: location.primary ? yellowIcon : blueIcon })
-        .addTo(map)
-        .bindPopup(`<strong>${location.name}</strong><br>Scoop Swift service area`);
-    });
-
-    L.circle([39.9376, -77.6611], {
-      radius: 26000,
-      color: "#005bff",
-      weight: 2,
-      fillColor: "#005bff",
-      fillOpacity: 0.08
-    }).addTo(map);
-
-    map.fitBounds(bounds, { padding: [28, 28] });
-
-    setTimeout(function () {
-      map.invalidateSize();
-    }, 200);
-    });
-  </script>
 </body>
 </html>
